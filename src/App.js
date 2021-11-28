@@ -12,11 +12,12 @@ class App extends Component {
   }
 
   changeRange = ({ target }) => {
-    if (isNaN(Number(target.value))) {
+    console.log();
+        if (isNaN(Number(target.value)) || Number(target.value) < 0) {
       return;
     }
     this.setState({
-      parentRange: target.value,
+      parentRange: +target.value,
     });
   };
 
@@ -25,8 +26,9 @@ class App extends Component {
     return (
       <>
       <div className='main_app'>
-      <CounterInputRange change={this.changeRange} />
+      <CounterInputRange change={this.changeRange} val={parentRange} />
         <CounterMain range={parentRange} />
+        <p>range: {parentRange}</p>
       </div>
         
       </>

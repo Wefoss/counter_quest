@@ -7,33 +7,83 @@ class CounterMain extends Component {
     super(props);
     this.state = {
       counter: 0,
-      swithBtn: true,
+      switchBtn: true,
     };
+    this.defultNumCounter = 1;
+    this.step = 1000;
+    this.interval = 5000;
+    this.setInterval = null;
   }
 
   checbox = (e) => {
     this.setState({
-      swithBtn: e.currentTarget.checked ? true : false,
+      switchBtn: e.currentTarget.checked ? true : false,
     });
   };
 
+  tick = () => {
+    const { range } = this.props;
+    const { switchBtn } = this.state;
+    this.setState((state) => {
+      return {
+        counter: switchBtn
+          ? state.counter + (this.defultNumCounter || range)
+          : state.counter > 0
+          ? state.counter - (this.defultNumCounter || range)
+          : 0,
+      };
+    });
+  };
+
+  componentDidMount() {
+    this.autoClick();
+    setTimeout(() => {
+      clearInterval(this.setInterval);
+      this.setInterval = null;
+    }, this.interval);
+  }
+
+  autoClick = () => {
+    if (!this.setInterval) {
+      this.setInterval = setInterval(this.tick, this.step);
+      setTimeout(() => {
+        clearInterval(this.setInterval);
+        this.setInterval = null;
+      }, this.interval);
+    }
+  };
+
+  shouldComponentUpdate(nextProps, nextState) {
+    if (nextProps.range !== this.props.range) {
+      return false;
+    }
+
+    return true;
+  }
+
   toggleBtn = (str) => {
     const { range } = this.props;
-    const { counter } = this.state;
-    this.setState({
-      counter: str === "add" ? counter + +range : counter - +range,
+    this.setState((state) => {
+      if (str === "del" && state.counter < range)
+        return { counter: (state.counter = 0) };
+      return {
+        counter: str === "add" ? state.counter + range : state.counter - range,
+      };
     });
   };
 
   render() {
-    const { counter, swithBtn } = this.state;
-    const { range } = this.props;
+    console.log("render");
+    const { counter, switchBtn } = this.state;
     return (
       <div className={style.main}>
         <p>Counter: {counter}</p>
-        <CounterBtn swith={swithBtn} toggleBtn={this.toggleBtn} />
-        <input type="checkbox" onChange={this.checbox} checked={swithBtn} />
-        <p>Range: {range}</p>
+        <CounterBtn swith={switchBtn} toggleBtn={this.toggleBtn} />
+        <button onClick={this.autoClick}>autoClick</button>
+        <input type="checkbox" onChange={this.checbox} checked={switchBtn} />
+        <p>
+          AutoClick will work <b>{this.interval / 1000}</b> sec
+        </p>
       </div>
     );
   }
